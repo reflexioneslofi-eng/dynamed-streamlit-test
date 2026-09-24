@@ -12,7 +12,10 @@ st.set_page_config(
 
 st.title("📚 Prueba DynaMed + Selenium")
 
-email = st.text_input("Email de DynaMed")
+email = st.text_input(
+    "Email de DynaMed",
+    type="default"
+)
 
 if st.button("🚀 Probar acceso"):
 
