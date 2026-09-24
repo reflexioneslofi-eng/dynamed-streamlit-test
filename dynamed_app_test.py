@@ -52,25 +52,17 @@ if st.button("🚀 Probar acceso"):
 
             if "Sign In" in link.text.strip():
 
-                link.click()
+                driver.execute_script(
+                    "arguments[0].click();",
+                    link
+                )
+
                 break
 
         time.sleep(5)
 
         # --------------------------------------------------
-        # 3. Introducir email
-        # --------------------------------------------------
-
-        username = driver.find_element(
-            By.ID,
-            "username"
-        )
-
-        username.clear()
-        username.send_keys(email)
-
-        # --------------------------------------------------
-        # 4. Pulsar Continue
+        # 3. Aceptar cookies si aparecen
         # --------------------------------------------------
 
         buttons = driver.find_elements(
@@ -80,29 +72,108 @@ if st.button("🚀 Probar acceso"):
 
         for button in buttons:
 
-            if button.text.strip() == "Continue":
+            try:
 
-                button.click()
-                break
+                text = button.text.strip()
+
+                if text == "Accept":
+
+                    driver.execute_script(
+                        "arguments[0].click();",
+                        button
+                    )
+
+                    time.sleep(2)
+
+                    break
+
+            except Exception:
+                pass
+
+        # --------------------------------------------------
+        # 4. Introducir email
+        # --------------------------------------------------
+
+        username = driver.find_element(
+            By.ID,
+            "username"
+        )
+
+        username.clear()
+
+        username.send_keys(email)
+
+        # --------------------------------------------------
+        # 5. Buscar Continue
+        # --------------------------------------------------
+
+        continue_button = None
+
+        buttons = driver.find_elements(
+            By.TAG_NAME,
+            "button"
+        )
+
+        for button in buttons:
+
+            try:
+
+                if button.text.strip() == "Continue":
+
+                    continue_button = button
+                    break
+
+            except Exception:
+                pass
+
+        if continue_button is None:
+
+            st.error(
+                "No se encontró el botón Continue."
+            )
+
+            st.stop()
+
+        # --------------------------------------------------
+        # 6. Pulsar Continue mediante JavaScript
+        # --------------------------------------------------
+
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'});",
+            continue_button
+        )
+
+        time.sleep(1)
+
+        driver.execute_script(
+            "arguments[0].click();",
+            continue_button
+        )
 
         time.sleep(5)
 
         # --------------------------------------------------
-        # 5. Mostrar resultado
+        # 7. Mostrar resultado
         # --------------------------------------------------
 
-        st.success("Email enviado a DynaMed.")
+        st.success(
+            "Email enviado. Selenium ha pulsado Continue."
+        )
 
         st.write("URL después de Continue:")
 
-        st.code(driver.current_url)
+        st.code(
+            driver.current_url
+        )
 
         st.write("Título:")
 
-        st.code(driver.title)
+        st.code(
+            driver.title
+        )
 
         # --------------------------------------------------
-        # 6. Captura
+        # 8. Captura
         # --------------------------------------------------
 
         screenshot_path = "/tmp/after_continue.png"
@@ -111,7 +182,9 @@ if st.button("🚀 Probar acceso"):
             screenshot_path
         )
 
-        st.write("Pantalla después de Continue:")
+        st.write(
+            "Pantalla después de Continue:"
+        )
 
         st.image(
             screenshot_path,
@@ -119,7 +192,7 @@ if st.button("🚀 Probar acceso"):
         )
 
         # --------------------------------------------------
-        # 7. Texto visible
+        # 9. Texto visible
         # --------------------------------------------------
 
         body_text = driver.find_element(
@@ -127,7 +200,9 @@ if st.button("🚀 Probar acceso"):
             "body"
         ).text
 
-        st.write("Texto visible:")
+        st.write(
+            "Texto visible:"
+        )
 
         st.text(
             body_text[:5000]
