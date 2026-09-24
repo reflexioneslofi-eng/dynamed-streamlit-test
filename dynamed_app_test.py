@@ -11,9 +11,7 @@ st.set_page_config(
 
 st.title("📚 Prueba DynaMed + Selenium")
 
-if st.button("🚀 Abrir DynaMed"):
-
-    st.info("Iniciando Chromium en el servidor...")
+if st.button("🚀 Probar acceso"):
 
     options = Options()
 
@@ -26,73 +24,94 @@ if st.button("🚀 Abrir DynaMed"):
 
     try:
 
-        # Abrir DynaMed
+        # --------------------------------------------------
+        # 1. DynaMed
+        # --------------------------------------------------
+
         driver.get("https://www.dynamed.com")
 
         time.sleep(5)
 
-        st.success("DynaMed abierto correctamente.")
+        st.write("DynaMed:")
+        st.code(driver.current_url)
 
-        st.write("URL inicial:")
+        # --------------------------------------------------
+        # 2. Sign In
+        # --------------------------------------------------
+
+        links = driver.find_elements(By.TAG_NAME, "a")
+
+        for link in links:
+
+            if "Sign In" in link.text.strip():
+
+                link.click()
+                break
+
+        time.sleep(5)
+
+        st.write("Login:")
         st.code(driver.current_url)
 
         st.write("Título:")
         st.code(driver.title)
 
-        # Buscar enlaces que contengan "Sign In"
-        links = driver.find_elements(By.TAG_NAME, "a")
+        # --------------------------------------------------
+        # 3. Buscar campos del formulario
+        # --------------------------------------------------
 
-        sign_in_found = False
+        inputs = driver.find_elements(By.TAG_NAME, "input")
 
-        for link in links:
+        st.write(f"Campos input encontrados: {len(inputs)}")
 
-            text = link.text.strip()
+        for i, element in enumerate(inputs):
 
-            if "Sign In" in text:
+            try:
 
-                st.info(f"Encontrado: {text}")
+                st.write(
+                    f"Input {i}: "
+                    f"type={element.get_attribute('type')} | "
+                    f"name={element.get_attribute('name')} | "
+                    f"id={element.get_attribute('id')} | "
+                    f"placeholder={element.get_attribute('placeholder')}"
+                )
 
-                link.click()
+            except Exception:
+                pass
 
-                sign_in_found = True
+        # --------------------------------------------------
+        # 4. Buscar botones
+        # --------------------------------------------------
 
-                break
+        buttons = driver.find_elements(By.TAG_NAME, "button")
 
-        if not sign_in_found:
+        st.write(f"Botones encontrados: {len(buttons)}")
 
-            st.warning("No se encontró automáticamente el enlace Sign In.")
+        for i, button in enumerate(buttons):
 
-        else:
+            try:
 
-            time.sleep(5)
+                st.write(
+                    f"Botón {i}: "
+                    f"text='{button.text}' | "
+                    f"type={button.get_attribute('type')}"
+                )
 
-            st.write("URL después de pulsar Sign In:")
-            st.code(driver.current_url)
+            except Exception:
+                pass
 
-            st.write("Título:")
-            st.code(driver.title)
+        # --------------------------------------------------
+        # 5. Captura
+        # --------------------------------------------------
 
-            # Captura
-            screenshot_path = "/tmp/dynamed_login.png"
+        screenshot_path = "/tmp/login.png"
 
-            driver.save_screenshot(screenshot_path)
+        driver.save_screenshot(screenshot_path)
 
-            st.write("Pantalla que está viendo Selenium:")
-
-            st.image(
-                screenshot_path,
-                use_container_width=True
-            )
-
-            # Texto
-            body_text = driver.find_element(
-                By.TAG_NAME,
-                "body"
-            ).text
-
-            st.write("Texto visible:")
-
-            st.text(body_text[:5000])
+        st.image(
+            screenshot_path,
+            use_container_width=True
+        )
 
     finally:
 
