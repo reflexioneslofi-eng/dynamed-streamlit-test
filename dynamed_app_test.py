@@ -299,18 +299,20 @@ if st.button("🚀 Login + buscar topic"):
     )
 
 
+       # =========================================================
+    # 11. ENCONTRAR Y ABRIR EL RESULTADO EXACTO
     # =========================================================
-    # 11. ENLACES
-    # =========================================================
+
+    st.info(
+        "Buscando el resultado exacto..."
+    )
 
     links = driver.find_elements(
         By.TAG_NAME,
         "a"
     )
 
-
-    found = []
-
+    target_link = None
 
     for link in links:
 
@@ -322,47 +324,85 @@ if st.button("🚀 Login + buscar topic"):
                 "href"
             )
 
-            if text and href:
+            if (
+                text.lower() == topic.lower()
+                and href
+                and "/condition/" in href
+            ):
 
-                if (
-                    "hip fracture" in text.lower()
-                    or "hip-fracture" in href.lower()
-                ):
+                target_link = link
 
-                    found.append(
-                        (
-                            text,
-                            href
-                        )
-                    )
+                break
 
         except Exception:
             pass
 
 
-    st.write(
-        "### Resultados encontrados"
+    if target_link is None:
+
+        st.error(
+            "No se encontró el resultado exacto."
+        )
+
+        driver.quit()
+        st.stop()
+
+
+    target_href = target_link.get_attribute(
+        "href"
+    )
+
+    target_text = target_link.text.strip()
+
+
+    st.success(
+        f"Resultado encontrado: {target_text}"
+    )
+
+    st.code(
+        target_href
     )
 
 
-    if found:
+    # =========================================================
+    # ABRIR RESULTADO
+    # =========================================================
 
-        for text, href in found:
+    st.info(
+        "Abriendo el resultado..."
+    )
 
-            st.write(
-                f"**{text}**"
-            )
+    driver.execute_script(
+        "arguments[0].click();",
+        target_link
+    )
 
-            st.code(
-                href
-            )
+    time.sleep(8)
 
-    else:
 
-        st.warning(
-            "No se encontró ningún resultado Hip Fracture."
-        )
+    # =========================================================
+    # COMPROBAR PÁGINA FINAL
+    # =========================================================
 
+    st.success(
+        "Resultado abierto."
+    )
+
+    st.write(
+        "### URL final"
+    )
+
+    st.code(
+        driver.current_url
+    )
+
+    st.write(
+        "### Título final"
+    )
+
+    st.code(
+        driver.title
+    )
 
     # =========================================================
     # 12. TEXTO DE LA PÁGINA
