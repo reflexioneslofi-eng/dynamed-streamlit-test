@@ -1,6 +1,7 @@
 import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 import time
 
 st.set_page_config(
@@ -24,35 +25,75 @@ if st.button("🚀 Abrir DynaMed"):
     driver = webdriver.Chrome(options=options)
 
     try:
+
+        # Abrir DynaMed
         driver.get("https://www.dynamed.com")
 
         time.sleep(5)
 
-        st.success("Chromium ha abierto DynaMed correctamente.")
+        st.success("DynaMed abierto correctamente.")
 
-        st.write("URL actual:")
+        st.write("URL inicial:")
         st.code(driver.current_url)
 
         st.write("Título:")
         st.code(driver.title)
 
-        # Captura de pantalla del navegador remoto
-        screenshot_path = "/tmp/dynamed.png"
-        driver.save_screenshot(screenshot_path)
+        # Buscar enlaces que contengan "Sign In"
+        links = driver.find_elements(By.TAG_NAME, "a")
 
-        st.write("Captura de lo que está viendo Selenium:")
+        sign_in_found = False
 
-        st.image(
-            screenshot_path,
-            use_container_width=True
-        )
+        for link in links:
 
-        # Texto visible de la página
-        st.write("Texto visible:")
+            text = link.text.strip()
 
-        body_text = driver.find_element("tag name", "body").text
+            if "Sign In" in text:
 
-        st.text(body_text[:5000])
+                st.info(f"Encontrado: {text}")
+
+                link.click()
+
+                sign_in_found = True
+
+                break
+
+        if not sign_in_found:
+
+            st.warning("No se encontró automáticamente el enlace Sign In.")
+
+        else:
+
+            time.sleep(5)
+
+            st.write("URL después de pulsar Sign In:")
+            st.code(driver.current_url)
+
+            st.write("Título:")
+            st.code(driver.title)
+
+            # Captura
+            screenshot_path = "/tmp/dynamed_login.png"
+
+            driver.save_screenshot(screenshot_path)
+
+            st.write("Pantalla que está viendo Selenium:")
+
+            st.image(
+                screenshot_path,
+                use_container_width=True
+            )
+
+            # Texto
+            body_text = driver.find_element(
+                By.TAG_NAME,
+                "body"
+            ).text
+
+            st.write("Texto visible:")
+
+            st.text(body_text[:5000])
 
     finally:
+
         driver.quit()
