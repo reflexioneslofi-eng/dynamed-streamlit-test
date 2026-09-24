@@ -262,101 +262,123 @@ if st.button("🚀 Login + inspeccionar topic"):
         time.sleep(4)
 
 
-        # =====================================================
-        # 9. INSPECCIONAR "HIP FRACTURE"
-        # =====================================================
+# =====================================================
+# 9. COMPROBAR PÁGINA DE RESULTADOS
+# =====================================================
 
-        st.info(
-            "Inspeccionando elementos del resultado..."
-        )
+st.success(
+    "Búsqueda enviada."
+)
+
+st.write("URL de búsqueda:")
+
+st.code(
+    driver.current_url
+)
+
+st.write("Título:")
+
+st.code(
+    driver.title
+)
 
 
-        elements = driver.find_elements(
-            By.XPATH,
-            "//*[normalize-space()='Hip Fracture']"
-        )
+# =====================================================
+# 10. BUSCAR ENLACES DE RESULTADOS
+# =====================================================
 
+st.info(
+    "Buscando resultados reales..."
+)
+
+links = driver.find_elements(
+    By.TAG_NAME,
+    "a"
+)
+
+
+results = []
+
+for link in links:
+
+    try:
+
+        text = link.text.strip()
+
+        href = link.get_attribute("href")
+
+        if text and href:
+
+            results.append(
+                (
+                    text,
+                    href
+                )
+            )
+
+    except Exception:
+        pass
+
+
+st.write(
+    f"Enlaces encontrados: {len(results)}"
+)
+
+
+# =====================================================
+# 11. MOSTRAR RESULTADOS
+# =====================================================
+
+for text, href in results:
+
+    if (
+        "hip fracture" in text.lower()
+        or "hip-fracture" in href.lower()
+    ):
 
         st.write(
-            f"Elementos encontrados con texto exacto: {len(elements)}"
+            f"**{text}**"
+        )
+
+        st.code(
+            href
         )
 
 
-        # =====================================================
-        # 10. MOSTRAR INFORMACIÓN DE CADA ELEMENTO
-        # =====================================================
+# =====================================================
+# 12. CAPTURA
+# =====================================================
 
-        for i, element in enumerate(elements):
+screenshot_path = "/tmp/search_results.png"
 
-            try:
+driver.save_screenshot(
+    screenshot_path
+)
 
-                st.write(
-                    f"### Elemento {i + 1}"
-                )
-
-
-                st.write(
-                    f"Etiqueta HTML: `{element.tag_name}`"
-                )
-
-
-                st.write(
-                    f"Texto: `{element.text}`"
-                )
+st.image(
+    screenshot_path,
+    caption="Página completa de resultados",
+    use_container_width=True
+)
 
 
-                st.write(
-                    f"href: `{element.get_attribute('href')}`"
-                )
+# =====================================================
+# 13. TEXTO VISIBLE
+# =====================================================
+
+body_text = driver.find_element(
+    By.TAG_NAME,
+    "body"
+).text
 
 
-                st.write(
-                    f"class: `{element.get_attribute('class')}`"
-                )
+st.write(
+    "Texto visible:"
+)
 
-
-                st.code(
-                    element.get_attribute(
-                        "outerHTML"
-                    ),
-                    language="html"
-                )
-
-
-            except Exception as e:
-
-                st.write(
-                    f"Error inspeccionando elemento: {e}"
-                )
-
-
-        # =====================================================
-        # 11. MOSTRAR TEXTO VISIBLE
-        # =====================================================
-
-        st.write(
-            "### Texto visible de la página"
-        )
-
-
-        body_text = driver.find_element(
-            By.TAG_NAME,
-            "body"
-        ).text
-
-
-        st.text(
-            body_text[:5000]
-        )
-
-
-    except Exception as e:
-
-        st.error(
-            f"Error: {type(e).__name__}"
-        )
-
-        st.exception(e)
+st.text(
+    body_text[:12000]
+)
 
 
     finally:
