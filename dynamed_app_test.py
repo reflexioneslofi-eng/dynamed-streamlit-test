@@ -12,7 +12,10 @@ st.set_page_config(
 
 st.title("📚 Prueba DynaMed + Selenium")
 
-email = st.text_input("Email de DynaMed")
+
+email = st.text_input(
+    "Email de DynaMed"
+)
 
 password = st.text_input(
     "Contraseña de DynaMed",
@@ -25,15 +28,20 @@ topic = st.text_input(
 )
 
 
-if st.button("🚀 Login + abrir topic"):
+if st.button("🚀 Login + inspeccionar topic"):
 
     if not email or not password or not topic:
-        st.warning("Introduce email, contraseña y topic.")
+
+        st.warning(
+            "Introduce email, contraseña y topic."
+        )
+
         st.stop()
 
-    # ---------------------------------------------------------
+
+    # =========================================================
     # CHROME
-    # ---------------------------------------------------------
+    # =========================================================
 
     options = Options()
 
@@ -46,22 +54,25 @@ if st.button("🚀 Login + abrir topic"):
         options=options
     )
 
+
     try:
 
-        # -----------------------------------------------------
+        # =====================================================
         # 1. ABRIR DYNAMED
-        # -----------------------------------------------------
+        # =====================================================
 
         st.info("Abriendo DynaMed...")
 
-        driver.get("https://www.dynamed.com")
+        driver.get(
+            "https://www.dynamed.com"
+        )
 
         time.sleep(5)
 
 
-        # -----------------------------------------------------
+        # =====================================================
         # 2. SIGN IN
-        # -----------------------------------------------------
+        # =====================================================
 
         st.info("Accediendo al login...")
 
@@ -86,12 +97,13 @@ if st.button("🚀 Login + abrir topic"):
             except Exception:
                 pass
 
+
         time.sleep(5)
 
 
-        # -----------------------------------------------------
+        # =====================================================
         # 3. COOKIES
-        # -----------------------------------------------------
+        # =====================================================
 
         buttons = driver.find_elements(
             By.TAG_NAME,
@@ -117,9 +129,9 @@ if st.button("🚀 Login + abrir topic"):
                 pass
 
 
-        # -----------------------------------------------------
+        # =====================================================
         # 4. EMAIL
-        # -----------------------------------------------------
+        # =====================================================
 
         username = driver.find_element(
             By.ID,
@@ -128,12 +140,14 @@ if st.button("🚀 Login + abrir topic"):
 
         username.clear()
 
-        username.send_keys(email)
+        username.send_keys(
+            email
+        )
 
 
-        # -----------------------------------------------------
+        # =====================================================
         # 5. CONTINUE
-        # -----------------------------------------------------
+        # =====================================================
 
         buttons = driver.find_elements(
             By.TAG_NAME,
@@ -156,12 +170,13 @@ if st.button("🚀 Login + abrir topic"):
             except Exception:
                 pass
 
+
         time.sleep(5)
 
 
-        # -----------------------------------------------------
+        # =====================================================
         # 6. PASSWORD
-        # -----------------------------------------------------
+        # =====================================================
 
         password_field = driver.find_element(
             By.ID,
@@ -170,12 +185,14 @@ if st.button("🚀 Login + abrir topic"):
 
         password_field.clear()
 
-        password_field.send_keys(password)
+        password_field.send_keys(
+            password
+        )
 
 
-        # -----------------------------------------------------
+        # =====================================================
         # 7. LOGIN
-        # -----------------------------------------------------
+        # =====================================================
 
         buttons = driver.find_elements(
             By.TAG_NAME,
@@ -212,19 +229,23 @@ if st.button("🚀 Login + abrir topic"):
             login_button
         )
 
+
         time.sleep(8)
 
 
-        st.success("Login realizado correctamente.")
+        st.success(
+            "Login realizado correctamente."
+        )
 
 
-        # -----------------------------------------------------
+        # =====================================================
         # 8. BUSCAR TOPIC
-        # -----------------------------------------------------
+        # =====================================================
 
         st.info(
             f"Buscando: {topic}"
         )
+
 
         search_box = driver.find_element(
             By.ID,
@@ -233,172 +254,99 @@ if st.button("🚀 Login + abrir topic"):
 
         search_box.clear()
 
-        search_box.send_keys(topic)
+        search_box.send_keys(
+            topic
+        )
+
 
         time.sleep(4)
 
 
-        # -----------------------------------------------------
-# 9. LOCALIZAR EL ELEMENTO "HIP FRACTURE"
-# -----------------------------------------------------
+        # =====================================================
+        # 9. INSPECCIONAR "HIP FRACTURE"
+        # =====================================================
 
-st.info("Inspeccionando elementos del resultado...")
-
-elements = driver.find_elements(
-    By.XPATH,
-    "//*[normalize-space()='Hip Fracture']"
-)
-
-st.write(
-    f"Elementos encontrados con texto exacto: {len(elements)}"
-)
+        st.info(
+            "Inspeccionando elementos del resultado..."
+        )
 
 
-for i, element in enumerate(elements):
+        elements = driver.find_elements(
+            By.XPATH,
+            "//*[normalize-space()='Hip Fracture']"
+        )
 
-    try:
-
-        st.write(f"### Elemento {i + 1}")
 
         st.write(
-            f"Etiqueta HTML: `{element.tag_name}`"
+            f"Elementos encontrados con texto exacto: {len(elements)}"
         )
+
+
+        # =====================================================
+        # 10. MOSTRAR INFORMACIÓN DE CADA ELEMENTO
+        # =====================================================
+
+        for i, element in enumerate(elements):
+
+            try:
+
+                st.write(
+                    f"### Elemento {i + 1}"
+                )
+
+
+                st.write(
+                    f"Etiqueta HTML: `{element.tag_name}`"
+                )
+
+
+                st.write(
+                    f"Texto: `{element.text}`"
+                )
+
+
+                st.write(
+                    f"href: `{element.get_attribute('href')}`"
+                )
+
+
+                st.write(
+                    f"class: `{element.get_attribute('class')}`"
+                )
+
+
+                st.code(
+                    element.get_attribute(
+                        "outerHTML"
+                    ),
+                    language="html"
+                )
+
+
+            except Exception as e:
+
+                st.write(
+                    f"Error inspeccionando elemento: {e}"
+                )
+
+
+        # =====================================================
+        # 11. MOSTRAR TEXTO VISIBLE
+        # =====================================================
 
         st.write(
-            f"Texto: `{element.text}`"
+            "### Texto visible de la página"
         )
 
-        st.write(
-            f"href: `{element.get_attribute('href')}`"
-        )
-
-        st.write(
-            f"class: `{element.get_attribute('class')}`"
-        )
-
-        st.code(
-            element.get_attribute("outerHTML"),
-            language="html"
-        )
-
-    except Exception as e:
-
-        st.write(
-            f"Error inspeccionando elemento: {e}"
-        )
-
-
-        # -----------------------------------------------------
-        # 10. COMPROBAR QUE LO HEMOS ENCONTRADO
-        # -----------------------------------------------------
-
-        if target_link is None:
-
-            st.error(
-                f'No se encontró un resultado exacto para "{topic}".'
-            )
-
-            st.write("Enlaces encontrados:")
-
-            for link in links:
-
-                try:
-
-                    text = link.text.strip()
-
-                    href = link.get_attribute("href")
-
-                    if text:
-
-                        st.write(
-                            f"{text} → {href}"
-                        )
-
-                except Exception:
-                    pass
-
-            st.stop()
-
-
-        st.success(
-            f'Topic encontrado: "{target_link.text.strip()}"'
-        )
-
-
-        # -----------------------------------------------------
-        # 11. MOSTRAR URL ANTES DEL CLICK
-        # -----------------------------------------------------
-
-        st.write("URL del resultado:")
-
-        st.code(
-            target_link.get_attribute("href")
-        )
-
-
-        # -----------------------------------------------------
-        # 12. ABRIR TOPIC
-        # -----------------------------------------------------
-
-        st.info("Abriendo topic...")
-
-        driver.execute_script(
-            "arguments[0].click();",
-            target_link
-        )
-
-        time.sleep(8)
-
-
-        # -----------------------------------------------------
-        # 13. COMPROBAR DESTINO
-        # -----------------------------------------------------
-
-        st.success("Topic abierto correctamente.")
-
-        st.write("URL final:")
-
-        st.code(
-            driver.current_url
-        )
-
-        st.write("Título:")
-
-        st.code(
-            driver.title
-        )
-
-
-        # -----------------------------------------------------
-        # 14. CAPTURA
-        # -----------------------------------------------------
-
-        screenshot_path = "/tmp/topic.png"
-
-        driver.save_screenshot(
-            screenshot_path
-        )
-
-        st.image(
-            screenshot_path,
-            caption="Página del topic",
-            use_container_width=True
-        )
-
-
-        # -----------------------------------------------------
-        # 15. TEXTO DE LA PÁGINA
-        # -----------------------------------------------------
 
         body_text = driver.find_element(
             By.TAG_NAME,
             "body"
         ).text
 
-        st.write("Texto visible:")
 
         st.text(
-            body_text[:10000]
+            body_text[:5000]
         )
 
 
