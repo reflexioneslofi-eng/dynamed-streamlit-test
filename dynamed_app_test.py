@@ -13,6 +13,7 @@ st.set_page_config(
 st.title("📚 Prueba DynaMed + Selenium")
 
 email = st.text_input("Email de DynaMed")
+
 password = st.text_input(
     "Contraseña de DynaMed",
     type="password"
@@ -24,7 +25,7 @@ topic = st.text_input(
 )
 
 
-if st.button("🚀 Login + buscar topic"):
+if st.button("🚀 Login + abrir topic"):
 
     if not email or not password or not topic:
         st.warning("Introduce email, contraseña y topic.")
@@ -59,7 +60,7 @@ if st.button("🚀 Login + buscar topic"):
 
 
         # -----------------------------------------------------
-        # 2. CLICK EN SIGN IN
+        # 2. SIGN IN
         # -----------------------------------------------------
 
         st.info("Accediendo al login...")
@@ -89,7 +90,7 @@ if st.button("🚀 Login + buscar topic"):
 
 
         # -----------------------------------------------------
-        # 3. ACEPTAR COOKIES
+        # 3. COOKIES
         # -----------------------------------------------------
 
         buttons = driver.find_elements(
@@ -214,13 +215,125 @@ if st.button("🚀 Login + buscar topic"):
         time.sleep(8)
 
 
+        st.success("Login realizado correctamente.")
+
+
         # -----------------------------------------------------
-        # 8. COMPROBAR LOGIN
+        # 8. BUSCAR TOPIC
         # -----------------------------------------------------
 
-        st.success("Login realizado.")
+        st.info(
+            f"Buscando: {topic}"
+        )
 
-        st.write("URL después del login:")
+        search_box = driver.find_element(
+            By.ID,
+            "autosuggest"
+        )
+
+        search_box.clear()
+
+        search_box.send_keys(topic)
+
+        time.sleep(4)
+
+
+        # -----------------------------------------------------
+        # 9. BUSCAR ENLACE EXACTO
+        # -----------------------------------------------------
+
+        target_link = None
+
+        links = driver.find_elements(
+            By.TAG_NAME,
+            "a"
+        )
+
+        for link in links:
+
+            try:
+
+                text = link.text.strip()
+
+                if text.lower() == topic.lower():
+
+                    target_link = link
+
+                    break
+
+            except Exception:
+                pass
+
+
+        # -----------------------------------------------------
+        # 10. COMPROBAR QUE LO HEMOS ENCONTRADO
+        # -----------------------------------------------------
+
+        if target_link is None:
+
+            st.error(
+                f'No se encontró un resultado exacto para "{topic}".'
+            )
+
+            st.write("Enlaces encontrados:")
+
+            for link in links:
+
+                try:
+
+                    text = link.text.strip()
+
+                    href = link.get_attribute("href")
+
+                    if text:
+
+                        st.write(
+                            f"{text} → {href}"
+                        )
+
+                except Exception:
+                    pass
+
+            st.stop()
+
+
+        st.success(
+            f'Topic encontrado: "{target_link.text.strip()}"'
+        )
+
+
+        # -----------------------------------------------------
+        # 11. MOSTRAR URL ANTES DEL CLICK
+        # -----------------------------------------------------
+
+        st.write("URL del resultado:")
+
+        st.code(
+            target_link.get_attribute("href")
+        )
+
+
+        # -----------------------------------------------------
+        # 12. ABRIR TOPIC
+        # -----------------------------------------------------
+
+        st.info("Abriendo topic...")
+
+        driver.execute_script(
+            "arguments[0].click();",
+            target_link
+        )
+
+        time.sleep(8)
+
+
+        # -----------------------------------------------------
+        # 13. COMPROBAR DESTINO
+        # -----------------------------------------------------
+
+        st.success("Topic abierto correctamente.")
+
+        st.write("URL final:")
 
         st.code(
             driver.current_url
@@ -234,84 +347,10 @@ if st.button("🚀 Login + buscar topic"):
 
 
         # -----------------------------------------------------
-        # 9. BUSCAR TOPIC
+        # 14. CAPTURA
         # -----------------------------------------------------
 
-        st.info(
-            f"Buscando topic: {topic}"
-        )
-
-
-        # Localizar buscador
-        search_box = driver.find_element(
-            By.ID,
-            "autosuggest"
-        )
-
-
-        # Limpiar
-        search_box.clear()
-
-
-        # Escribir topic
-        search_box.send_keys(topic)
-
-
-        time.sleep(4)
-
-
-        # -----------------------------------------------------
-        # 10. MOSTRAR RESULTADOS DEL BUSCADOR
-        # -----------------------------------------------------
-
-        st.write("Resultados encontrados:")
-
-        links = driver.find_elements(
-            By.TAG_NAME,
-            "a"
-        )
-
-        results = []
-
-        for link in links:
-
-            try:
-
-                text = link.text.strip()
-
-                href = link.get_attribute("href")
-
-                if text:
-
-                    results.append(
-                        {
-                            "text": text,
-                            "href": href
-                        }
-                    )
-
-            except Exception:
-                pass
-
-
-        for result in results[:30]:
-
-            st.write(
-                result["text"]
-            )
-
-            if result["href"]:
-
-                st.code(
-                    result["href"]
-                )
-
-
-        # -----------------------------------------------------
-        # 11. SCREENSHOT
-        # -----------------------------------------------------
-
-        screenshot_path = "/tmp/search.png"
+        screenshot_path = "/tmp/topic.png"
 
         driver.save_screenshot(
             screenshot_path
@@ -319,13 +358,13 @@ if st.button("🚀 Login + buscar topic"):
 
         st.image(
             screenshot_path,
-            caption="Resultados de búsqueda",
+            caption="Página del topic",
             use_container_width=True
         )
 
 
         # -----------------------------------------------------
-        # 12. TEXTO VISIBLE
+        # 15. TEXTO DE LA PÁGINA
         # -----------------------------------------------------
 
         body_text = driver.find_element(
@@ -333,11 +372,10 @@ if st.button("🚀 Login + buscar topic"):
             "body"
         ).text
 
-
         st.write("Texto visible:")
 
         st.text(
-            body_text[:8000]
+            body_text[:10000]
         )
 
 
