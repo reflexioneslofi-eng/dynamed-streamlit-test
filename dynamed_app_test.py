@@ -2,6 +2,7 @@ import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 import time
 
 
@@ -28,14 +29,12 @@ topic = st.text_input(
 )
 
 
-if st.button("🚀 Login + inspeccionar topic"):
+if st.button("🚀 Login + buscar topic"):
 
     if not email or not password or not topic:
-
         st.warning(
             "Introduce email, contraseña y topic."
         )
-
         st.stop()
 
 
@@ -146,7 +145,7 @@ if st.button("🚀 Login + inspeccionar topic"):
 
 
         # =====================================================
-        # 5. CONTINUE
+        # 5. CONTINUE EMAIL
         # =====================================================
 
         buttons = driver.find_elements(
@@ -259,126 +258,192 @@ if st.button("🚀 Login + inspeccionar topic"):
         )
 
 
-        time.sleep(4)
+        time.sleep(2)
 
 
-# =====================================================
-# 9. COMPROBAR PÁGINA DE RESULTADOS
-# =====================================================
+        # =====================================================
+        # 9. PULSAR ENTER
+        # =====================================================
 
-st.success(
-    "Búsqueda enviada."
-)
+        st.info(
+            "Enviando búsqueda..."
+        )
 
-st.write("URL de búsqueda:")
-
-st.code(
-    driver.current_url
-)
-
-st.write("Título:")
-
-st.code(
-    driver.title
-)
+        search_box.send_keys(
+            Keys.ENTER
+        )
 
 
-# =====================================================
-# 10. BUSCAR ENLACES DE RESULTADOS
-# =====================================================
-
-st.info(
-    "Buscando resultados reales..."
-)
-
-links = driver.find_elements(
-    By.TAG_NAME,
-    "a"
-)
+        time.sleep(8)
 
 
-results = []
+        # =====================================================
+        # 10. COMPROBAR PÁGINA DE RESULTADOS
+        # =====================================================
 
-for link in links:
+        st.success(
+            "Búsqueda enviada."
+        )
 
-    try:
-
-        text = link.text.strip()
-
-        href = link.get_attribute("href")
-
-        if text and href:
-
-            results.append(
-                (
-                    text,
-                    href
-                )
-            )
-
-    except Exception:
-        pass
-
-
-st.write(
-    f"Enlaces encontrados: {len(results)}"
-)
-
-
-# =====================================================
-# 11. MOSTRAR RESULTADOS
-# =====================================================
-
-for text, href in results:
-
-    if (
-        "hip fracture" in text.lower()
-        or "hip-fracture" in href.lower()
-    ):
 
         st.write(
-            f"**{text}**"
+            "URL actual:"
         )
 
         st.code(
-            href
+            driver.current_url
         )
 
 
-# =====================================================
-# 12. CAPTURA
-# =====================================================
+        st.write(
+            "Título:"
+        )
 
-screenshot_path = "/tmp/search_results.png"
-
-driver.save_screenshot(
-    screenshot_path
-)
-
-st.image(
-    screenshot_path,
-    caption="Página completa de resultados",
-    use_container_width=True
-)
+        st.code(
+            driver.title
+        )
 
 
-# =====================================================
-# 13. TEXTO VISIBLE
-# =====================================================
+        # =====================================================
+        # 11. BUSCAR ENLACES
+        # =====================================================
 
-body_text = driver.find_element(
-    By.TAG_NAME,
-    "body"
-).text
+        st.info(
+            "Buscando resultados..."
+        )
 
 
-st.write(
-    "Texto visible:"
-)
+        links = driver.find_elements(
+            By.TAG_NAME,
+            "a"
+        )
 
-st.text(
-    body_text[:12000]
-)
+
+        results = []
+
+
+        for link in links:
+
+            try:
+
+                text = link.text.strip()
+
+                href = link.get_attribute(
+                    "href"
+                )
+
+
+                if text and href:
+
+                    results.append(
+                        (
+                            text,
+                            href
+                        )
+                    )
+
+
+            except Exception:
+                pass
+
+
+        st.write(
+            f"Enlaces encontrados: {len(results)}"
+        )
+
+
+        # =====================================================
+        # 12. MOSTRAR RESULTADOS RELACIONADOS
+        # =====================================================
+
+        st.write(
+            "### Resultados relacionados con el topic"
+        )
+
+
+        found = False
+
+
+        for text, href in results:
+
+            if (
+                "hip fracture" in text.lower()
+                or "hip-fracture" in href.lower()
+            ):
+
+                found = True
+
+
+                st.write(
+                    f"**{text}**"
+                )
+
+
+                st.code(
+                    href
+                )
+
+
+        if not found:
+
+            st.warning(
+                "No se encontró ningún enlace relacionado con el topic."
+            )
+
+
+        # =====================================================
+        # 13. CAPTURA DE PANTALLA
+        # =====================================================
+
+        screenshot_path = (
+            "/tmp/search_results.png"
+        )
+
+
+        driver.save_screenshot(
+            screenshot_path
+        )
+
+
+        st.image(
+            screenshot_path,
+            caption="Página de resultados",
+            use_container_width=True
+        )
+
+
+        # =====================================================
+        # 14. TEXTO VISIBLE
+        # =====================================================
+
+        body_text = driver.find_element(
+            By.TAG_NAME,
+            "body"
+        ).text
+
+
+        st.write(
+            "### Texto visible"
+        )
+
+
+        st.text(
+            body_text[:12000]
+        )
+
+
+    except Exception as e:
+
+        st.error(
+            f"Error: {type(e).__name__}"
+        )
+
+        st.exception(e)
+
+
+    finally:
+
+        driver.quit()
 
 
     finally:
