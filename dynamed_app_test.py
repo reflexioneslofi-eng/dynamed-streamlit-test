@@ -13,14 +13,20 @@ st.set_page_config(
 st.title("📚 Prueba DynaMed + Selenium")
 
 email = st.text_input(
-    "Email de DynaMed",
-    type="default"
+    "Email de DynaMed"
 )
 
-if st.button("🚀 Probar acceso"):
+password = st.text_input(
+    "Contraseña de DynaMed",
+    type="password"
+)
 
-    if not email:
-        st.warning("Introduce primero tu email.")
+if st.button("🚀 Iniciar sesión"):
+
+    if not email or not password:
+        st.warning(
+            "Introduce email y contraseña."
+        )
         st.stop()
 
     options = Options()
@@ -30,7 +36,9 @@ if st.button("🚀 Probar acceso"):
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
 
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(
+        options=options
+    )
 
     try:
 
@@ -38,15 +46,20 @@ if st.button("🚀 Probar acceso"):
         # 1. Abrir DynaMed
         # --------------------------------------------------
 
-        driver.get("https://www.dynamed.com")
+        driver.get(
+            "https://www.dynamed.com"
+        )
 
         time.sleep(5)
 
         # --------------------------------------------------
-        # 2. Pulsar Sign In
+        # 2. Sign In
         # --------------------------------------------------
 
-        links = driver.find_elements(By.TAG_NAME, "a")
+        links = driver.find_elements(
+            By.TAG_NAME,
+            "a"
+        )
 
         for link in links:
 
@@ -62,7 +75,7 @@ if st.button("🚀 Probar acceso"):
         time.sleep(5)
 
         # --------------------------------------------------
-        # 3. Aceptar cookies si aparecen
+        # 3. Cookies
         # --------------------------------------------------
 
         buttons = driver.find_elements(
@@ -74,9 +87,7 @@ if st.button("🚀 Probar acceso"):
 
             try:
 
-                text = button.text.strip()
-
-                if text == "Accept":
+                if button.text.strip() == "Accept":
 
                     driver.execute_script(
                         "arguments[0].click();",
@@ -91,7 +102,7 @@ if st.button("🚀 Probar acceso"):
                 pass
 
         # --------------------------------------------------
-        # 4. Introducir email
+        # 4. Email
         # --------------------------------------------------
 
         username = driver.find_element(
@@ -101,13 +112,13 @@ if st.button("🚀 Probar acceso"):
 
         username.clear()
 
-        username.send_keys(email)
+        username.send_keys(
+            email
+        )
 
         # --------------------------------------------------
-        # 5. Buscar Continue
+        # 5. Continue
         # --------------------------------------------------
-
-        continue_button = None
 
         buttons = driver.find_elements(
             By.TAG_NAME,
@@ -120,70 +131,109 @@ if st.button("🚀 Probar acceso"):
 
                 if button.text.strip() == "Continue":
 
-                    continue_button = button
+                    driver.execute_script(
+                        "arguments[0].click();",
+                        button
+                    )
+
                     break
 
             except Exception:
                 pass
 
-        if continue_button is None:
+        time.sleep(5)
+
+        # --------------------------------------------------
+        # 6. Contraseña
+        # --------------------------------------------------
+
+        password_field = driver.find_element(
+            By.ID,
+            "password"
+        )
+
+        password_field.clear()
+
+        password_field.send_keys(
+            password
+        )
+
+        # --------------------------------------------------
+        # 7. Login
+        # --------------------------------------------------
+
+        buttons = driver.find_elements(
+            By.TAG_NAME,
+            "button"
+        )
+
+        login_button = None
+
+        for button in buttons:
+
+            try:
+
+                if button.text.strip() == "Continue":
+
+                    login_button = button
+                    break
+
+            except Exception:
+                pass
+
+        if login_button is None:
 
             st.error(
-                "No se encontró el botón Continue."
+                "No se encontró el botón Continue después de introducir la contraseña."
             )
 
             st.stop()
 
-        # --------------------------------------------------
-        # 6. Pulsar Continue mediante JavaScript
-        # --------------------------------------------------
-
-        driver.execute_script(
-            "arguments[0].scrollIntoView({block: 'center'});",
-            continue_button
-        )
-
-        time.sleep(1)
-
         driver.execute_script(
             "arguments[0].click();",
-            continue_button
+            login_button
         )
 
-        time.sleep(5)
-
         # --------------------------------------------------
-        # 7. Mostrar resultado
+        # 8. Esperar login
         # --------------------------------------------------
 
-        st.success(
-            "Email enviado. Selenium ha pulsado Continue."
+        time.sleep(8)
+
+        # --------------------------------------------------
+        # 9. Resultado
+        # --------------------------------------------------
+
+        st.write(
+            "URL después del login:"
         )
-
-        st.write("URL después de Continue:")
 
         st.code(
             driver.current_url
         )
 
-        st.write("Título:")
+        st.write(
+            "Título:"
+        )
 
         st.code(
             driver.title
         )
 
         # --------------------------------------------------
-        # 8. Captura
+        # 10. Captura
         # --------------------------------------------------
 
-        screenshot_path = "/tmp/after_continue.png"
+        screenshot_path = (
+            "/tmp/after_login.png"
+        )
 
         driver.save_screenshot(
             screenshot_path
         )
 
         st.write(
-            "Pantalla después de Continue:"
+            "Pantalla después del login:"
         )
 
         st.image(
@@ -192,7 +242,7 @@ if st.button("🚀 Probar acceso"):
         )
 
         # --------------------------------------------------
-        # 9. Texto visible
+        # 11. Texto
         # --------------------------------------------------
 
         body_text = driver.find_element(
