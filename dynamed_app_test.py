@@ -11,7 +11,7 @@ st.set_page_config(
     page_icon="📚"
 )
 
-st.title("📚 Prueba DynaMed + Selenium")
+st.title("📚 DynaMed + Selenium")
 
 
 email = st.text_input(
@@ -32,9 +32,7 @@ topic = st.text_input(
 if st.button("🚀 Login + buscar topic"):
 
     if not email or not password or not topic:
-        st.warning(
-            "Introduce email, contraseña y topic."
-        )
+        st.warning("Introduce email, contraseña y topic.")
         st.stop()
 
 
@@ -54,398 +52,358 @@ if st.button("🚀 Login + buscar topic"):
     )
 
 
-    try:
+    # =========================================================
+    # 1. DYNAMED
+    # =========================================================
 
-        # =====================================================
-        # 1. ABRIR DYNAMED
-        # =====================================================
+    st.info("Abriendo DynaMed...")
 
-        st.info("Abriendo DynaMed...")
+    driver.get(
+        "https://www.dynamed.com"
+    )
 
-        driver.get(
-            "https://www.dynamed.com"
-        )
+    time.sleep(5)
 
-        time.sleep(5)
 
+    # =========================================================
+    # 2. SIGN IN
+    # =========================================================
 
-        # =====================================================
-        # 2. SIGN IN
-        # =====================================================
+    st.info("Buscando Sign In...")
 
-        st.info("Accediendo al login...")
+    links = driver.find_elements(
+        By.TAG_NAME,
+        "a"
+    )
 
-        links = driver.find_elements(
-            By.TAG_NAME,
-            "a"
-        )
+    for link in links:
 
-        for link in links:
+        try:
 
-            try:
+            if "Sign In" in link.text.strip():
 
-                if "Sign In" in link.text.strip():
-
-                    driver.execute_script(
-                        "arguments[0].click();",
-                        link
-                    )
-
-                    break
-
-            except Exception:
-                pass
-
-
-        time.sleep(5)
-
-
-        # =====================================================
-        # 3. COOKIES
-        # =====================================================
-
-        buttons = driver.find_elements(
-            By.TAG_NAME,
-            "button"
-        )
-
-        for button in buttons:
-
-            try:
-
-                if button.text.strip() == "Accept":
-
-                    driver.execute_script(
-                        "arguments[0].click();",
-                        button
-                    )
-
-                    time.sleep(2)
-
-                    break
-
-            except Exception:
-                pass
-
-
-        # =====================================================
-        # 4. EMAIL
-        # =====================================================
-
-        username = driver.find_element(
-            By.ID,
-            "username"
-        )
-
-        username.clear()
-
-        username.send_keys(
-            email
-        )
-
-
-        # =====================================================
-        # 5. CONTINUE EMAIL
-        # =====================================================
-
-        buttons = driver.find_elements(
-            By.TAG_NAME,
-            "button"
-        )
-
-        for button in buttons:
-
-            try:
-
-                if button.text.strip() == "Continue":
-
-                    driver.execute_script(
-                        "arguments[0].click();",
-                        button
-                    )
-
-                    break
-
-            except Exception:
-                pass
-
-
-        time.sleep(5)
-
-
-        # =====================================================
-        # 6. PASSWORD
-        # =====================================================
-
-        password_field = driver.find_element(
-            By.ID,
-            "password"
-        )
-
-        password_field.clear()
-
-        password_field.send_keys(
-            password
-        )
-
-
-        # =====================================================
-        # 7. LOGIN
-        # =====================================================
-
-        buttons = driver.find_elements(
-            By.TAG_NAME,
-            "button"
-        )
-
-        login_button = None
-
-        for button in buttons:
-
-            try:
-
-                if button.text.strip() == "Continue":
-
-                    login_button = button
-
-                    break
-
-            except Exception:
-                pass
-
-
-        if login_button is None:
-
-            st.error(
-                "No se encontró el botón Continue."
-            )
-
-            st.stop()
-
-
-        driver.execute_script(
-            "arguments[0].click();",
-            login_button
-        )
-
-
-        time.sleep(8)
-
-
-        st.success(
-            "Login realizado correctamente."
-        )
-
-
-        # =====================================================
-        # 8. BUSCAR TOPIC
-        # =====================================================
-
-        st.info(
-            f"Buscando: {topic}"
-        )
-
-
-        search_box = driver.find_element(
-            By.ID,
-            "autosuggest"
-        )
-
-        search_box.clear()
-
-        search_box.send_keys(
-            topic
-        )
-
-
-        time.sleep(2)
-
-
-        # =====================================================
-        # 9. PULSAR ENTER
-        # =====================================================
-
-        st.info(
-            "Enviando búsqueda..."
-        )
-
-        search_box.send_keys(
-            Keys.ENTER
-        )
-
-
-        time.sleep(8)
-
-
-        # =====================================================
-        # 10. COMPROBAR PÁGINA DE RESULTADOS
-        # =====================================================
-
-        st.success(
-            "Búsqueda enviada."
-        )
-
-
-        st.write(
-            "URL actual:"
-        )
-
-        st.code(
-            driver.current_url
-        )
-
-
-        st.write(
-            "Título:"
-        )
-
-        st.code(
-            driver.title
-        )
-
-
-        # =====================================================
-        # 11. BUSCAR ENLACES
-        # =====================================================
-
-        st.info(
-            "Buscando resultados..."
-        )
-
-
-        links = driver.find_elements(
-            By.TAG_NAME,
-            "a"
-        )
-
-
-        results = []
-
-
-        for link in links:
-
-            try:
-
-                text = link.text.strip()
-
-                href = link.get_attribute(
-                    "href"
+                driver.execute_script(
+                    "arguments[0].click();",
+                    link
                 )
 
+                break
 
-                if text and href:
+        except Exception:
+            pass
 
-                    results.append(
+
+    time.sleep(5)
+
+
+    # =========================================================
+    # 3. COOKIES
+    # =========================================================
+
+    buttons = driver.find_elements(
+        By.TAG_NAME,
+        "button"
+    )
+
+    for button in buttons:
+
+        try:
+
+            if button.text.strip() == "Accept":
+
+                driver.execute_script(
+                    "arguments[0].click();",
+                    button
+                )
+
+                time.sleep(2)
+
+                break
+
+        except Exception:
+            pass
+
+
+    # =========================================================
+    # 4. EMAIL
+    # =========================================================
+
+    st.info("Introduciendo email...")
+
+    username = driver.find_element(
+        By.ID,
+        "username"
+    )
+
+    username.clear()
+
+    username.send_keys(
+        email
+    )
+
+
+    # =========================================================
+    # 5. CONTINUE
+    # =========================================================
+
+    buttons = driver.find_elements(
+        By.TAG_NAME,
+        "button"
+    )
+
+    for button in buttons:
+
+        try:
+
+            if button.text.strip() == "Continue":
+
+                driver.execute_script(
+                    "arguments[0].click();",
+                    button
+                )
+
+                break
+
+        except Exception:
+            pass
+
+
+    time.sleep(5)
+
+
+    # =========================================================
+    # 6. PASSWORD
+    # =========================================================
+
+    st.info("Introduciendo contraseña...")
+
+    password_field = driver.find_element(
+        By.ID,
+        "password"
+    )
+
+    password_field.clear()
+
+    password_field.send_keys(
+        password
+    )
+
+
+    # =========================================================
+    # 7. LOGIN
+    # =========================================================
+
+    buttons = driver.find_elements(
+        By.TAG_NAME,
+        "button"
+    )
+
+    login_button = None
+
+    for button in buttons:
+
+        try:
+
+            if button.text.strip() == "Continue":
+
+                login_button = button
+
+                break
+
+        except Exception:
+            pass
+
+
+    if login_button is None:
+
+        st.error(
+            "No se encontró el botón Continue."
+        )
+
+        st.stop()
+
+
+    driver.execute_script(
+        "arguments[0].click();",
+        login_button
+    )
+
+    time.sleep(8)
+
+
+    st.success(
+        "Login realizado correctamente."
+    )
+
+
+    # =========================================================
+    # 8. BUSCAR TOPIC
+    # =========================================================
+
+    st.info(
+        f'Buscando "{topic}"...'
+    )
+
+    search_box = driver.find_element(
+        By.ID,
+        "autosuggest"
+    )
+
+    search_box.clear()
+
+    search_box.send_keys(
+        topic
+    )
+
+    time.sleep(2)
+
+
+    # =========================================================
+    # 9. ENTER
+    # =========================================================
+
+    st.info(
+        "Enviando búsqueda con ENTER..."
+    )
+
+    search_box.send_keys(
+        Keys.ENTER
+    )
+
+    time.sleep(8)
+
+
+    # =========================================================
+    # 10. RESULTADO
+    # =========================================================
+
+    st.success(
+        "Búsqueda enviada."
+    )
+
+    st.write(
+        "### URL actual"
+    )
+
+    st.code(
+        driver.current_url
+    )
+
+
+    st.write(
+        "### Título"
+    )
+
+    st.code(
+        driver.title
+    )
+
+
+    # =========================================================
+    # 11. ENLACES
+    # =========================================================
+
+    links = driver.find_elements(
+        By.TAG_NAME,
+        "a"
+    )
+
+
+    found = []
+
+
+    for link in links:
+
+        try:
+
+            text = link.text.strip()
+
+            href = link.get_attribute(
+                "href"
+            )
+
+            if text and href:
+
+                if (
+                    "hip fracture" in text.lower()
+                    or "hip-fracture" in href.lower()
+                ):
+
+                    found.append(
                         (
                             text,
                             href
                         )
                     )
 
-
-            except Exception:
-                pass
-
-
-        st.write(
-            f"Enlaces encontrados: {len(results)}"
-        )
+        except Exception:
+            pass
 
 
-        # =====================================================
-        # 12. MOSTRAR RESULTADOS RELACIONADOS
-        # =====================================================
-
-        st.write(
-            "### Resultados relacionados con el topic"
-        )
+    st.write(
+        "### Resultados encontrados"
+    )
 
 
-        found = False
+    if found:
 
+        for text, href in found:
 
-        for text, href in results:
-
-            if (
-                "hip fracture" in text.lower()
-                or "hip-fracture" in href.lower()
-            ):
-
-                found = True
-
-
-                st.write(
-                    f"**{text}**"
-                )
-
-
-                st.code(
-                    href
-                )
-
-
-        if not found:
-
-            st.warning(
-                "No se encontró ningún enlace relacionado con el topic."
+            st.write(
+                f"**{text}**"
             )
 
+            st.code(
+                href
+            )
 
-        # =====================================================
-        # 13. CAPTURA DE PANTALLA
-        # =====================================================
+    else:
 
-        screenshot_path = (
-            "/tmp/search_results.png"
+        st.warning(
+            "No se encontró ningún resultado Hip Fracture."
         )
 
 
-        driver.save_screenshot(
-            screenshot_path
-        )
+    # =========================================================
+    # 12. TEXTO DE LA PÁGINA
+    # =========================================================
+
+    body_text = driver.find_element(
+        By.TAG_NAME,
+        "body"
+    ).text
 
 
-        st.image(
-            screenshot_path,
-            caption="Página de resultados",
-            use_container_width=True
-        )
+    st.write(
+        "### Texto visible de la página"
+    )
+
+    st.text(
+        body_text[:12000]
+    )
 
 
-        # =====================================================
-        # 14. TEXTO VISIBLE
-        # =====================================================
+    # =========================================================
+    # 13. SCREENSHOT
+    # =========================================================
 
-        body_text = driver.find_element(
-            By.TAG_NAME,
-            "body"
-        ).text
+    screenshot_path = (
+        "/tmp/search_results.png"
+    )
 
+    driver.save_screenshot(
+        screenshot_path
+    )
 
-        st.write(
-            "### Texto visible"
-        )
-
-
-        st.text(
-            body_text[:12000]
-        )
-
-
-    except Exception as e:
-
-        st.error(
-            f"Error: {type(e).__name__}"
-        )
-
-        st.exception(e)
+    st.image(
+        screenshot_path,
+        caption="Página de resultados",
+        use_container_width=True
+    )
 
 
-    finally:
+    # =========================================================
+    # 14. CERRAR CHROME
+    # =========================================================
 
-        driver.quit()
-
-
-    finally:
-
-        driver.quit()
+    driver.quit()
