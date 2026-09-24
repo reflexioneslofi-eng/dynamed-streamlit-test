@@ -239,30 +239,53 @@ if st.button("🚀 Login + abrir topic"):
 
 
         # -----------------------------------------------------
-        # 9. BUSCAR ENLACE EXACTO
-        # -----------------------------------------------------
+# 9. LOCALIZAR EL ELEMENTO "HIP FRACTURE"
+# -----------------------------------------------------
 
-        target_link = None
+st.info("Inspeccionando elementos del resultado...")
 
-        links = driver.find_elements(
-            By.TAG_NAME,
-            "a"
+elements = driver.find_elements(
+    By.XPATH,
+    "//*[normalize-space()='Hip Fracture']"
+)
+
+st.write(
+    f"Elementos encontrados con texto exacto: {len(elements)}"
+)
+
+
+for i, element in enumerate(elements):
+
+    try:
+
+        st.write(f"### Elemento {i + 1}")
+
+        st.write(
+            f"Etiqueta HTML: `{element.tag_name}`"
         )
 
-        for link in links:
+        st.write(
+            f"Texto: `{element.text}`"
+        )
 
-            try:
+        st.write(
+            f"href: `{element.get_attribute('href')}`"
+        )
 
-                text = link.text.strip()
+        st.write(
+            f"class: `{element.get_attribute('class')}`"
+        )
 
-                if text.lower() == topic.lower():
+        st.code(
+            element.get_attribute("outerHTML"),
+            language="html"
+        )
 
-                    target_link = link
+    except Exception as e:
 
-                    break
-
-            except Exception:
-                pass
+        st.write(
+            f"Error inspeccionando elemento: {e}"
+        )
 
 
         # -----------------------------------------------------
