@@ -360,11 +360,9 @@ if st.button("🚀 Ejecutar Pregunteitor"):
         start=1
     ):
 
-
         st.write(
             "---"
         )
-
 
         st.subheader(
             f"Topic {number}/{len(topics_test)}: {topic}"
@@ -386,13 +384,31 @@ if st.button("🚀 Ejecutar Pregunteitor"):
         )
 
 
-        search_box.clear()
+        # -------------------------------------------------
+        # LIMPIAR CORRECTAMENTE EL CAMPO REACT
+        # -------------------------------------------------
 
+        search_box.click()
+
+        search_box.send_keys(
+            Keys.CONTROL,
+            "a"
+        )
+
+        search_box.send_keys(
+            Keys.BACKSPACE
+        )
+
+        time.sleep(1)
+
+
+        # =================================================
+        # ESCRIBIR TOPIC
+        # =================================================
 
         search_box.send_keys(
             topic
         )
-
 
         time.sleep(2)
 
@@ -405,7 +421,6 @@ if st.button("🚀 Ejecutar Pregunteitor"):
             Keys.ENTER
         )
 
-
         time.sleep(6)
 
 
@@ -415,7 +430,7 @@ if st.button("🚀 Ejecutar Pregunteitor"):
 
 
         # =================================================
-        # BUSCAR CONDITION
+        # BUSCAR RESULTADOS DE CONTENIDO
         # =================================================
 
         links = driver.find_elements(
@@ -438,11 +453,25 @@ if st.button("🚀 Ejecutar Pregunteitor"):
                 )
 
 
-                if (
-                    text.lower() == topic.lower()
-                    and href
-                    and "/condition/" in href
-                ):
+                if not href:
+                    continue
+
+
+                # Solo enlaces que llevan a contenido
+                # real de DynaMed.
+
+                is_content = (
+                    "/condition/" in href
+                    or "/drug-monograph/" in href
+                    or "/management/" in href
+                    or "/evaluation/" in href
+                    or "/prevention/" in href
+                    or "/procedure/" in href
+                    or "/approach-to/" in href
+                )
+
+
+                if is_content:
 
                     target_link = link
 
@@ -455,17 +484,20 @@ if st.button("🚀 Ejecutar Pregunteitor"):
 
 
         # =================================================
-        # ABRIR CONDITION
+        # ABRIR RESULTADO
         # =================================================
 
         if target_link is None:
 
-            st.error(
-                f"No se encontró Condition para: {topic}"
+            st.warning(
+                f"No se encontró un resultado de contenido "
+                f"para: {topic}"
             )
 
             continue
 
+
+        target_text = target_link.text.strip()
 
         target_href = target_link.get_attribute(
             "href"
@@ -473,9 +505,18 @@ if st.button("🚀 Ejecutar Pregunteitor"):
 
 
         st.success(
-            f"Condition encontrado: {target_href}"
+            f"Resultado encontrado: {target_text}"
         )
 
+
+        st.code(
+            target_href
+        )
+
+
+        # =================================================
+        # ABRIR
+        # =================================================
 
         driver.execute_script(
             "arguments[0].click();",
@@ -492,20 +533,28 @@ if st.button("🚀 Ejecutar Pregunteitor"):
 
 
         # =================================================
-        # COMPROBAR QUE ESTAMOS EN EL TOPIC
+        # COMPROBAR
         # =================================================
 
-        if "/condition/" in driver.current_url:
+        if (
+            "/condition/" in driver.current_url
+            or "/drug-monograph/" in driver.current_url
+            or "/management/" in driver.current_url
+            or "/evaluation/" in driver.current_url
+            or "/prevention/" in driver.current_url
+            or "/procedure/" in driver.current_url
+            or "/approach-to/" in driver.current_url
+        ):
 
             st.success(
-                "✓ Topic abierto correctamente."
+                "✓ Resultado abierto correctamente."
             )
 
         else:
 
             st.warning(
                 "La URL final no parece corresponder "
-                "a un Condition."
+                "a contenido de DynaMed."
             )
 
 
