@@ -21,7 +21,7 @@ st.title("📚 Pregunteitor")
 
 TOPICS_FILE = "topics_1.csv"
 
-N_TOPICS_TEST = 3
+N_TOPICS_TEST = 99
 
 
 # =========================================================
