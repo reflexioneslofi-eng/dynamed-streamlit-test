@@ -349,45 +349,45 @@ if st.button("🚀 Ejecutar Pregunteitor"):
 
 
         # =================================================
-# VOLVER A LA PÁGINA PRINCIPAL DE DYNAMED
-# =================================================
-
-driver.get(
-    "https://www.dynamed.com"
-)
-
-time.sleep(5)
-
-
-# =================================================
-# ESPERAR AL BUSCADOR
-# =================================================
-
-search_box = None
-
-for _ in range(20):
-
-    try:
-
-        search_box = driver.find_element(
-            By.ID,
-            "autosuggest"
+        # VOLVER A LA PÁGINA PRINCIPAL DE DYNAMED
+        # =================================================
+        
+        driver.get(
+            "https://www.dynamed.com"
         )
-
-        break
-
-    except Exception:
-
-        time.sleep(1)
-
-
-if search_box is None:
-
-    st.warning(
-        "⚠ no se encontró el buscador de DynaMed"
-    )
-
-    continue
+        
+        time.sleep(5)
+        
+        
+        # =================================================
+        # ESPERAR AL BUSCADOR
+        # =================================================
+        
+        search_box = None
+        
+        for _ in range(20):
+        
+            try:
+        
+                search_box = driver.find_element(
+                    By.ID,
+                    "autosuggest"
+                )
+        
+                break
+        
+            except Exception:
+        
+                time.sleep(1)
+        
+        
+        if search_box is None:
+        
+            st.warning(
+                "⚠ no se encontró el buscador de DynaMed"
+            )
+        
+            continue
 
         # =================================================
         # LIMPIAR BUSCADOR
