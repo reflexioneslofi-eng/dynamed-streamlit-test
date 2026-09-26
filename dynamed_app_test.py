@@ -21,7 +21,7 @@ st.title("📚 Pregunteitor")
 
 TOPICS_FILE = "topics_1.csv"
 
-N_TOPICS_TEST = 90
+N_TOPICS_TEST = 25
 
 
 # =========================================================
@@ -75,18 +75,8 @@ st.success(
 
 
 st.write(
-    "### Topics que se van a probar"
+    f"Se probarán los primeros {len(topics_test)} topics."
 )
-
-
-for i, topic in enumerate(
-    topics_test,
-    start=1
-):
-
-    st.write(
-        f"{i}. {topic}"
-    )
 
 
 # =========================================================
@@ -161,10 +151,9 @@ if st.button("🚀 Ejecutar Pregunteitor"):
     time.sleep(5)
 
 
-    st.info(
-        "Buscando Sign In..."
-    )
-
+    # =====================================================
+    # SIGN IN
+    # =====================================================
 
     links = driver.find_elements(
         By.TAG_NAME,
@@ -227,11 +216,6 @@ if st.button("🚀 Ejecutar Pregunteitor"):
     # EMAIL
     # =====================================================
 
-    st.info(
-        "Introduciendo email..."
-    )
-
-
     username = driver.find_element(
         By.ID,
         "username"
@@ -279,11 +263,6 @@ if st.button("🚀 Ejecutar Pregunteitor"):
     # =====================================================
     # PASSWORD
     # =====================================================
-
-    st.info(
-        "Introduciendo contraseña..."
-    )
-
 
     password_field = driver.find_element(
         By.ID,
@@ -352,7 +331,7 @@ if st.button("🚀 Ejecutar Pregunteitor"):
 
 
     # =====================================================
-    # PROCESAR LOS 3 TOPICS
+    # PROCESAR TOPICS
     # =====================================================
 
     for number, topic in enumerate(
@@ -364,8 +343,8 @@ if st.button("🚀 Ejecutar Pregunteitor"):
             "---"
         )
 
-        st.subheader(
-            f"Topic {number}/{len(topics_test)}: {topic}"
+        st.write(
+            f"**Topic {number}/{len(topics_test)}: {topic}**"
         )
 
 
@@ -373,20 +352,15 @@ if st.button("🚀 Ejecutar Pregunteitor"):
         # BUSCADOR
         # =================================================
 
-        st.info(
-            f'Buscando "{topic}"...'
-        )
-
-
         search_box = driver.find_element(
             By.ID,
             "autosuggest"
         )
 
 
-        # -------------------------------------------------
-        # LIMPIAR CORRECTAMENTE EL CAMPO REACT
-        # -------------------------------------------------
+        # =================================================
+        # LIMPIAR BUSCADOR
+        # =================================================
 
         search_box.click()
 
@@ -414,7 +388,7 @@ if st.button("🚀 Ejecutar Pregunteitor"):
 
 
         # =================================================
-        # ENTER
+        # BUSCAR
         # =================================================
 
         search_box.send_keys(
@@ -424,13 +398,8 @@ if st.button("🚀 Ejecutar Pregunteitor"):
         time.sleep(6)
 
 
-        st.write(
-            f"Resultados: {driver.current_url}"
-        )
-
-
         # =================================================
-        # BUSCAR RESULTADOS DE CONTENIDO
+        # BUSCAR RESULTADO DE CONTENIDO
         # =================================================
 
         links = driver.find_elements(
@@ -457,8 +426,9 @@ if st.button("🚀 Ejecutar Pregunteitor"):
                     continue
 
 
-                # Solo enlaces que llevan a contenido
-                # real de DynaMed.
+                # -----------------------------------------
+                # TIPOS DE CONTENIDO VÁLIDOS
+                # -----------------------------------------
 
                 is_content = (
                     "/condition/" in href
@@ -484,38 +454,32 @@ if st.button("🚀 Ejecutar Pregunteitor"):
 
 
         # =================================================
-        # ABRIR RESULTADO
+        # NO ENCONTRADO
         # =================================================
 
         if target_link is None:
 
             st.warning(
-                f"No se encontró un resultado de contenido "
-                f"para: {topic}"
+                "⚠ no se encontró un resultado de contenido"
             )
 
             continue
 
 
+        # =================================================
+        # RESULTADO ENCONTRADO
+        # =================================================
+
         target_text = target_link.text.strip()
 
-        target_href = target_link.get_attribute(
-            "href"
-        )
 
-
-        st.success(
-            f"Resultado encontrado: {target_text}"
-        )
-
-
-        st.code(
-            target_href
+        st.write(
+            f"✓ encontrado → {target_text}"
         )
 
 
         # =================================================
-        # ABRIR
+        # ABRIR RESULTADO
         # =================================================
 
         driver.execute_script(
@@ -527,34 +491,31 @@ if st.button("🚀 Ejecutar Pregunteitor"):
         time.sleep(6)
 
 
-        st.write(
-            f"URL final: {driver.current_url}"
-        )
-
-
         # =================================================
-        # COMPROBAR
+        # COMPROBAR APERTURA
         # =================================================
+
+        current_url = driver.current_url
+
 
         if (
-            "/condition/" in driver.current_url
-            or "/drug-monograph/" in driver.current_url
-            or "/management/" in driver.current_url
-            or "/evaluation/" in driver.current_url
-            or "/prevention/" in driver.current_url
-            or "/procedure/" in driver.current_url
-            or "/approach-to/" in driver.current_url
+            "/condition/" in current_url
+            or "/drug-monograph/" in current_url
+            or "/management/" in current_url
+            or "/evaluation/" in current_url
+            or "/prevention/" in current_url
+            or "/procedure/" in current_url
+            or "/approach-to/" in current_url
         ):
 
-            st.success(
-                "✓ Resultado abierto correctamente."
+            st.write(
+                "✓ abierto"
             )
 
         else:
 
             st.warning(
-                "La URL final no parece corresponder "
-                "a contenido de DynaMed."
+                "⚠ el resultado no parece haberse abierto correctamente"
             )
 
 
@@ -568,7 +529,7 @@ if st.button("🚀 Ejecutar Pregunteitor"):
 
 
     st.success(
-        "🎉 Prueba de los 3 topics terminada."
+        f"🎉 Prueba terminada: {len(topics_test)} topics."
     )
 
 
@@ -577,3 +538,4 @@ if st.button("🚀 Ejecutar Pregunteitor"):
     # =====================================================
 
     driver.quit()
+
