@@ -19,9 +19,20 @@ st.title("📚 Pregunteitor")
 # CONFIGURACIÓN
 # =========================================================
 
-TOPICS_FILE = "topics_1.csv"
-
 N_TOPICS_TEST = 99
+
+# Lista de los 10 csv disponibles (topics_1.csv ... topics_10.csv)
+CSV_OPTIONS = [f"topics_{i}.csv" for i in range(1, 11)]
+
+
+# =========================================================
+# SELECCIÓN DE CSV (se elige desde el principio)
+# =========================================================
+
+TOPICS_FILE = st.selectbox(
+    "Selecciona el archivo de topics a usar",
+    CSV_OPTIONS
+)
 
 
 # =========================================================
@@ -569,4 +580,3 @@ if st.button("🚀 Ejecutar Pregunteitor"):
     # =====================================================
 
     driver.quit()
-
